@@ -31,6 +31,8 @@
 # to overcome catastrophic cancellation.
 # Please make sure that you take care of all the special cases.
 
+import numpy as np
+
 def quadratic(a, b, c):
     """Numerically stable quadratic equation solver
 
@@ -69,12 +71,26 @@ def quadratic(a, b, c):
         s = 1
     else:
         s = -1
+
     x1 = (-b - s*(b*b - 4*a*c)**(1/2)) / (2*a)
-    x2 = (c/a)/x1
-    
-    if type(x1)==complex:
+    try:
+        x2 = (c/a)/x1
+    except:
+        x2 = None
+
+    if np.isreal(x1) and np.isreal(x2) and x2 is not None:
+        results = (min(x1,x2), max(x1,x2))
+        if x1==x2:
+            results = (x1, None)
+    elif np.isreal(x1):
+        x2 = None
+        results = (x1,x2)
+    elif np.isreal(x2):
         x1 = None
-        
-    if type(x2)==complex:
-        x2 = None    
-    return x1, x2
+        results = (x2,x1)
+    else:
+        x1 = None
+        x2 = None
+        results = (x1,x2)
+
+    return results
